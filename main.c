@@ -4,6 +4,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 #include "parser/parser.h"
+#include "store/store.h"
 
 #define EPOLL_EVENTS_SIZE 1024
 #define CLIENT_BUFFER_SIZE 1024
@@ -30,6 +31,8 @@ void handle_client_accept() {
 }
 
 int main() {
+    init_table();
+
     server_fd = init_server(INADDR_ANY, 9090, 10);
 
     epfd = epoll_create1(0);
