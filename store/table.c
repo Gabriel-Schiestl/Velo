@@ -157,20 +157,26 @@ void print_table() {
     printf("--------------\n");
 }
 
-Entry* new_entry(const char* key, char* value, int *ttl) {
+Entry* new_entry(const char* key, char* value, long *ttl) {
     Entry *e1 = malloc(sizeof(Entry));
+    if (!e1) return NULL;
+
     char *e1_key = strndup(key, MAX_KEY_SIZE);
-    int* e1_ttl = malloc(sizeof(int));
-    if(ttl) {
-        *e1_ttl = *ttl;
-    } else {
-        e1_ttl = NULL;
-    }
 
     e1->key = e1_key;
     e1->value = strdup(value);
-    e1->ttl = e1_ttl;
     e1->next = NULL;
+
+    if (ttl) {
+        e1->ttl = malloc(sizeof(long));
+        if (!e1->ttl) {
+            free(e1);
+            return NULL;
+        }
+        *e1->ttl = *ttl;
+    } else {
+        e1->ttl = NULL;
+    }
 
     return e1;
 }

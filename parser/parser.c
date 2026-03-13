@@ -32,10 +32,18 @@ int get_blank_index(char *message) {
     return i;
 }
 
-void process_command(char *cmd, char *key, char *value, int fd) {
+void process_command(char *cmd, char *key, char *value, char *ttl, int fd) {
+    char *end;
+    long ttl_number = strtol(ttl, &end, 10);
+
+    if (end == value) {
+        send_error("invalid ttl number", fd, 1);
+        return;
+    }
+
     if(strcmp(cmd, "SET") == 0) {
         printf("Calling insertion\n");
-        char *resp = process_insert(key, value);
+        char *resp = process_insert(key, value, &ttl_number);
         if(resp) {
             send_success(resp, fd, 1);
             return;
@@ -84,42 +92,31 @@ void process_command(char *cmd, char *key, char *value, int fd) {
 void handle_client_message(char* message, int client_fd) {
     printf("Message received: %s", message);
 
-    int cmd_idx = get_blank_index(message);
-    if (cmd_idx == 0) {
+    char *saveptr;
+
+    char *cmd = strtok_r(message, " \r\n", &saveptr);
+    char *key = strtok_r(NULL, " \r\n", &saveptr);
+    char *value = strtok_r(NULL, " \r\n", &saveptr);
+    char *ttl = strtok_r(NULL, " \r\n", &saveptr);
+
+    if(!cmd) {
         send_error("command not received", client_fd, 1);
         return;
     }
 
-    message[cmd_idx] = '\0';
-
-    char *cmd = message;
-    char *rest = message + cmd_idx + 1;
-
-    int key_idx = get_blank_index(rest);
-    if (key_idx == 0) {
+    if(!key) {
         send_error("key not received", client_fd, 1);
         return;
     }
 
-    char *key;
-    char *value = NULL;
+    printf("%s, %s, %s, %s\n",
+        cmd,
+        key,
+        value ? value : "NULL",
+        ttl ? ttl : "NULL"
+    );
 
-    if(rest[key_idx] == '\0') {
-        key = rest;
-    } else {
-        rest[key_idx] = '\0';
-        key = rest;
-        value = rest + key_idx + 1;
-    }
-
-    key[strcspn(key, "\r\n")] = 0;
-
-    if(value)
-        value[strcspn(value, "\r\n")] = 0;
-
-    printf("%s, %s, %s\n", cmd, key, value);
-
-    process_command(cmd, key, value, client_fd);
+    process_command(cmd, key, value, ttl, client_fd);
 }
 
 
