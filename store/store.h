@@ -19,6 +19,7 @@ int8_t table_insert(const char* key, Entry *value);
 int8_t table_delete(const char* key);
 Entry* table_get(const char* key);
 Entry* new_entry(const char* key, char* value, int *ttl);
+Entry* table_expire(const char* key);
 
 void init_table();
 void print_table();

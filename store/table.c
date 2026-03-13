@@ -115,6 +115,30 @@ Entry* table_get(const char* key) {
     return NULL;
 }
 
+Entry* table_expire(const char* key) {
+    if (strlen(key) == 0) {
+        return NULL;
+    }
+    int index = hash(key);
+
+    Entry* current = table[index];
+
+    while(current) {
+        printf("Checking key: '%s'\n", current->key);
+
+        int cmp = strcmp(current->key, key);
+
+        if(cmp == 0) {
+            free(current->ttl);
+            current->ttl = NULL;
+            return current;
+        }
+        current = current->next;
+    }
+
+    return NULL;
+}
+
 void print_table() {
     for(int i = 0; i < table_size; i++) {
         Entry *curr = table[i];
@@ -136,10 +160,16 @@ void print_table() {
 Entry* new_entry(const char* key, char* value, int *ttl) {
     Entry *e1 = malloc(sizeof(Entry));
     char *e1_key = strndup(key, MAX_KEY_SIZE);
+    int* e1_ttl = malloc(sizeof(int));
+    if(ttl) {
+        *e1_ttl = *ttl;
+    } else {
+        e1_ttl = NULL;
+    }
 
     e1->key = e1_key;
     e1->value = strdup(value);
-    e1->ttl = ttl;
+    e1->ttl = e1_ttl;
     e1->next = NULL;
 
     return e1;
