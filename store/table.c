@@ -9,7 +9,7 @@
 
 typedef struct Entry {
     char* key;
-    void* value;
+    char* value;
     int* ttl;
     struct Entry* next;
 } Entry;
@@ -81,6 +81,7 @@ int8_t table_delete(const char* key) {
             *current = node->next;
 
             free(node->key);
+            free(node->value);
             free(node);
 
             continue; 
@@ -96,12 +97,16 @@ Entry* table_get(const char* key) {
     if (strlen(key) == 0) {
         return NULL;
     }
-
     int index = hash(key);
 
     Entry* current = table[index];
+
     while(current) {
-        if(strcmp(current->key, key) == 0) {
+        printf("Checking key: '%s'\n", current->key);
+
+        int cmp = strcmp(current->key, key);
+
+        if(cmp == 0) {
             return current;
         }
         current = current->next;
@@ -128,13 +133,14 @@ void print_table() {
     printf("--------------\n");
 }
 
-Entry* new_entry(const char* key, void* value, int *ttl) {
+Entry* new_entry(const char* key, char* value, int *ttl) {
     Entry *e1 = malloc(sizeof(Entry));
     char *e1_key = strndup(key, MAX_KEY_SIZE);
 
     e1->key = e1_key;
-    e1->value = value;
+    e1->value = strdup(value);
     e1->ttl = ttl;
+    e1->next = NULL;
 
     return e1;
 }

@@ -53,7 +53,7 @@ int main() {
                 continue;
             }
             
-            char buffer[CLIENT_BUFFER_SIZE];
+            char buffer[CLIENT_BUFFER_SIZE] = {0};
 
             int n_read = read(fd, buffer, sizeof(buffer));
             if(n_read == -1) {

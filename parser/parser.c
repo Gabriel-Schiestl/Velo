@@ -2,6 +2,7 @@
 #include <string.h>
 #include "../processor/processor.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 void send_error(char* message, int fd, int _close) {
     write(fd, "err: ", 5);
@@ -42,10 +43,18 @@ void process_command(char *cmd, char *key, char *value, int fd) {
 
         send_error("could not insert new entry", fd, 1);
     } 
-    // else if(strcmp(cmd, "GET")) {
-    //     char *resp = process_insert(key, value);
-    //     send_success(resp, fd, 1);
-    // } else if(strcmp(cmd, "DELETE")) {
+    else if(strcmp(cmd, "GET") == 0) {
+        printf("Calling getter\n");
+        char *resp = process_select(key);
+        if(resp) {
+            send_success(resp, fd, 1);
+            free(resp);
+            return;
+        }
+
+        send_error("could not get entry with this key", fd, 1);
+    } 
+    // else if(strcmp(cmd, "DELETE")) {
     //     char *resp = process_insert(key, value);
     //     send_success(resp, fd, 1);
     // } else if(strcmp(cmd, "EXPIRE")) {
@@ -79,12 +88,23 @@ void handle_client_message(char* message, int client_fd) {
         return;
     }
 
-    rest[key_idx] = '\0';
+    char *key;
+    char *value = NULL;
 
-    char *key = rest;
-    char *value = rest + key_idx + 1;
+    if(rest[key_idx] == '\0') {
+        key = rest;
+    } else {
+        rest[key_idx] = '\0';
+        key = rest;
+        value = rest + key_idx + 1;
+    }
 
-    printf("%s, %s, %s", cmd, key, value);
+    key[strcspn(key, "\r\n")] = 0;
+
+    if(value)
+        value[strcspn(value, "\r\n")] = 0;
+
+    printf("%s, %s, %s\n", cmd, key, value);
 
     process_command(cmd, key, value, client_fd);
 }

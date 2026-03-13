@@ -8,7 +8,7 @@
 
 struct Entry {
     char* key;
-    void* value;
+    char* value;
     int* ttl;
     struct Entry* next;
 };
@@ -18,7 +18,7 @@ typedef struct Entry Entry;
 int8_t table_insert(const char* key, Entry *value);
 int8_t table_delete(const char* key);
 Entry* table_get(const char* key);
-Entry* new_entry(const char* key, void* value, int *ttl);
+Entry* new_entry(const char* key, char* value, int *ttl);
 
 void init_table();
 void print_table();
