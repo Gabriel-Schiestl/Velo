@@ -53,11 +53,17 @@ void process_command(char *cmd, char *key, char *value, int fd) {
         }
 
         send_error("could not get entry with this key", fd, 1);
+    } else if(strcmp(cmd, "DELETE") == 0) {
+        printf("Calling deletion\n");
+        char *resp = process_delete(key);
+        if(!resp) {
+            send_error("could not delete entry", fd, 1);
+            return;
+        }
+
+        send_success(resp, fd, 1);
     } 
-    // else if(strcmp(cmd, "DELETE")) {
-    //     char *resp = process_insert(key, value);
-    //     send_success(resp, fd, 1);
-    // } else if(strcmp(cmd, "EXPIRE")) {
+    // else if(strcmp(cmd, "EXPIRE")) {
     //     char *resp = process_insert(key, value);
     //     send_success(resp, fd, 1);
     // } else if(strcmp(cmd, "REST")) {
