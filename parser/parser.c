@@ -33,17 +33,9 @@ int get_blank_index(char *message) {
 }
 
 void process_command(char *cmd, char *key, char *value, char *ttl, int fd) {
-    char *end;
-    long ttl_number = strtol(ttl, &end, 10);
-
-    if (end == value) {
-        send_error("invalid ttl number", fd, 1);
-        return;
-    }
-
     if(strcmp(cmd, "SET") == 0) {
         printf("Calling insertion\n");
-        char *resp = process_insert(key, value, &ttl_number);
+        char *resp = process_insert(key, value, ttl);
         if(resp) {
             send_success(resp, fd, 1);
             return;

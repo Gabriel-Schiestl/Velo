@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #define INITIAL_TABLE_SIZE 50
 #define MAX_KEY_SIZE 50
@@ -10,7 +11,8 @@
 typedef struct Entry {
     char* key;
     char* value;
-    int* ttl;
+    time_t expire_at;
+    int has_ttl;
     struct Entry* next;
 } Entry;
 
@@ -107,6 +109,11 @@ Entry* table_get(const char* key) {
         int cmp = strcmp(current->key, key);
 
         if(cmp == 0) {
+            if(current->has_ttl && time(NULL) >= current->expire_at) {
+                current = current->next;
+                continue;
+            }
+
             return current;
         }
         current = current->next;
@@ -129,8 +136,8 @@ Entry* table_expire(const char* key) {
         int cmp = strcmp(current->key, key);
 
         if(cmp == 0) {
-            free(current->ttl);
-            current->ttl = NULL;
+            current->expire_at = 0;
+            current->has_ttl = 0;
             return current;
         }
         current = current->next;
@@ -157,28 +164,25 @@ void print_table() {
     printf("--------------\n");
 }
 
-Entry* new_entry(const char* key, char* value, long *ttl) {
-    Entry *e1 = malloc(sizeof(Entry));
-    if (!e1) return NULL;
+Entry* new_entry(const char* key, char* value, char *ttl) {
+    Entry *e = malloc(sizeof(Entry));
+    if (!e) return NULL;
 
-    char *e1_key = strndup(key, MAX_KEY_SIZE);
+    char *e_key = strndup(key, MAX_KEY_SIZE);
 
-    e1->key = e1_key;
-    e1->value = strdup(value);
-    e1->next = NULL;
+    e->key = e_key;
+    e->value = strdup(value);
+    e->next = NULL;
 
-    if (ttl) {
-        e1->ttl = malloc(sizeof(long));
-        if (!e1->ttl) {
-            free(e1);
-            return NULL;
-        }
-        *e1->ttl = *ttl;
+    if(ttl) {
+        long ttl_seconds = strtol(ttl, NULL, 10);
+        e->expire_at = time(NULL) + ttl_seconds;
+        e->has_ttl = 1;
     } else {
-        e1->ttl = NULL;
+        e->has_ttl = 0;
     }
 
-    return e1;
+    return e;
 }
 
 void init_table() {
