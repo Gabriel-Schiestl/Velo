@@ -72,13 +72,13 @@ void process_command(char *cmd, char *key, char *value, char *ttl, int fd) {
         }
 
         send_error("could not expire entry", fd, 1);
-    } 
-    // else if(strcmp(cmd, "REST")) {
-    //     char *resp = process_insert(key, value);
-    //     send_success(resp, fd, 1);
-    // } else {
-
-    // }
+    } else if(strcmp(cmd, "REMAINING") == 0) {
+        char *resp = process_remaining(key);
+        send_success(resp, fd, 1);
+        free(resp);
+    } else {
+        send_error("command not allowed", fd, 1);
+    }
 }
 
 void handle_client_message(char* message, int client_fd) {
