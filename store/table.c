@@ -136,8 +136,7 @@ Entry* table_expire(const char* key) {
         int cmp = strcmp(current->key, key);
 
         if(cmp == 0) {
-            current->expire_at = 0;
-            current->has_ttl = 0;
+            current->expire_at = -1;
             return current;
         }
         current = current->next;
@@ -156,7 +155,11 @@ void print_table() {
 
         printf("%d - ", i);
         while(curr) {
-            printf("%s\t\t", curr->key);
+            if(curr->expire_at == -1) {
+                printf("%s (expired) \t\t", curr->key);
+            } else {
+                printf("%s\t\t", curr->key);
+            }
             curr = curr->next;
         }
         printf("\n");
@@ -179,6 +182,7 @@ Entry* new_entry(const char* key, char* value, uint64_t ttl) {
         e->has_ttl = 1;
     } else {
         e->has_ttl = 0;
+        e->expire_at = 0;
     }
 
     return e;

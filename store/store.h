@@ -5,11 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <time.h>
 
 struct Entry {
     char* key;
     char* value;
-    int* ttl;
+    time_t expire_at;
+    int has_ttl;
     struct Entry* next;
 };
 
