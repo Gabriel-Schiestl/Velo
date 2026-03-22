@@ -6,11 +6,11 @@ char* process_select(char* key) {
     if(!result)
         return NULL;
 
-    size_t len = strlen(result->value) + strlen("SUCCESS ") + 1;
+    size_t len = strlen(result->value) + strlen("OK ") + 1;
 
     char *resp = malloc(len);
 
-    snprintf(resp, len, "SUCCESS %s", result->value);
+    snprintf(resp, len, "OK %s", result->value);
 
     return resp;
 }

@@ -1,11 +1,12 @@
 #include "../store/store.h"
+#include <stdint.h>
 
-char* process_insert(char* key, char* value, char *ttl) {
+char* process_insert(char* key, char* value, uint64_t ttl) {
     Entry *entry = new_entry(key, value, ttl);
     printf("New entry created: %s", key);
     if(table_insert(key, entry) == -1) {
         return NULL;
     }
     print_table();
-    return "SUCCESS";
+    return "OK";
 }

@@ -164,7 +164,7 @@ void print_table() {
     printf("--------------\n");
 }
 
-Entry* new_entry(const char* key, char* value, char *ttl) {
+Entry* new_entry(const char* key, char* value, uint64_t ttl) {
     Entry *e = malloc(sizeof(Entry));
     if (!e) return NULL;
 
@@ -175,8 +175,7 @@ Entry* new_entry(const char* key, char* value, char *ttl) {
     e->next = NULL;
 
     if(ttl) {
-        long ttl_seconds = strtol(ttl, NULL, 10);
-        e->expire_at = time(NULL) + ttl_seconds;
+        e->expire_at = time(NULL) + ttl;
         e->has_ttl = 1;
     } else {
         e->has_ttl = 0;

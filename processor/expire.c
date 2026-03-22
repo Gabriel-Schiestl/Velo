@@ -6,11 +6,11 @@ char* process_expire(char* key) {
         return NULL;
     }
 
-    int n = snprintf(NULL, 0, "%s %s", "SUCCESS", result->key);
+    int n = snprintf(NULL, 0, "%s %s", "OK", result->key);
 
     char *response = malloc(n + 1);
 
-    snprintf(response, n + 1, "%s %s", "SUCCESS", result->key);
+    snprintf(response, n + 1, "%s %s", "OK", result->key);
 
     return response;
 }

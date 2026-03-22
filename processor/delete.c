@@ -6,5 +6,5 @@ char* process_delete(char* key) {
         return NULL;
     }
     print_table();
-    return "SUCCESS";
+    return "OK";
 }
