@@ -10,5 +10,5 @@ char* process_delete(char* key);
 
 char* process_expire(char* key);
 
-// char* process_remaining(char* key);
+char* process_remaining(char* key);
 #endif

@@ -31,20 +31,34 @@ int hash(const char *key) {
 }
 
 int resize_needed() {
-    return ((element_count / table_size) * 100) >= TABLE_RESIZE_NEEDED ? 0 : -1; 
+    return ((element_count * 100) / table_size) >= TABLE_RESIZE_NEEDED ? 0 : -1;
 }
 
 int resize_table() {
-    int new_table_size = table_size * 2;
+    int old_size = table_size;
+    Entry **old_table = table;
 
-    void* tmp = realloc(table, new_table_size);
-    if(tmp == NULL) {
+    int new_size = old_size * 2;
+    table = calloc(new_size, sizeof(Entry*));
+    if (table == NULL) {
+        table = old_table;
         return -1;
     }
 
-    table_size = new_table_size;
-    table = tmp;
+    table_size = new_size;
 
+    for (int i = 0; i < old_size; i++) {
+        Entry *curr = old_table[i];
+        while (curr) {
+            Entry *next = curr->next;
+            int new_index = hash(curr->key);
+            curr->next = table[new_index];
+            table[new_index] = curr;
+            curr = next;
+        }
+    }
+
+    free(old_table);
     return 0;
 }
 
@@ -85,8 +99,9 @@ int8_t table_delete(const char* key) {
             free(node->key);
             free(node->value);
             free(node);
+            element_count--;
 
-            continue; 
+            continue;
         }
 
         current = &node->next;
@@ -137,6 +152,7 @@ Entry* table_expire(const char* key) {
 
         if(cmp == 0) {
             current->expire_at = -1;
+            current->has_ttl = 1;
             return current;
         }
         current = current->next;
